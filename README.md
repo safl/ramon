@@ -61,7 +61,12 @@ owners = []
 | `a`       | Show only the repositories marked `!` |
 | `p`, `i`  | Show the pull requests or the issues |
 | `tab`     | Move focus between the tables |
-| `q`       | Quit |
+| `q`, `ctrl+c` | Quit |
+
+The keys are plain letters, `tab`, the arrows and the page keys, which zellij's
+normal mode and Windows Terminal pass through. ramon binds no Alt key, no
+Ctrl+Shift key and none of zellij's mode keys; Textual's `ctrl+p` command
+palette and `ctrl+q` quit are disabled for that reason.
 
 `ramon --plain` prints the repository table once and exits. It exits with 1
 when a repository could not be fetched.
