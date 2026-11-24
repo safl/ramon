@@ -16,6 +16,22 @@ the `## X.Y.Z` section to this file. When it lands on `main`,
 the pull request, then tags the commit and creates the GitHub release. Release
 tags are not pushed by hand.
 
+## 0.2.0
+
+ramon now works inside zellij and Windows Terminal: it binds no key that
+either takes for itself. Textual's command palette moves from ctrl+p to `:`,
+Textual's ctrl+q quit is gone, and ctrl+c quits alongside `q`.
+
+The arrows and enter replace `p`, `i` and `o`. Up and down move through the
+focused table, left and right switch between the pull requests and the
+issues, and enter opens the highlighted repository, pull request or issue in
+the browser.
+
+`t` steps through the themes and shows the current one in the title bar. The
+configuration gains `theme`, to start with a given theme, and `glyphs`, which
+with the value "nerd" shows the checks, review states and attention mark as
+Nerd Font glyphs.
+
 ## 0.1.0
 
 The first release. ramon shows the GitHub state of the repositories listed in
