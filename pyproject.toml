@@ -4,7 +4,7 @@
 
 [project]
 name = "ramon"
-version = "0.2.0"
+version = "0.2.1"
 description = "Monitor the GitHub state of a list of repositories in a terminal UI"
 readme = "README.md"
 license = "GPL-2.0-only"
