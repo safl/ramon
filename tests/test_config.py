@@ -29,6 +29,7 @@ def test_example_parses():
         ('repos = "a/b"', "list of strings"),
         ('owners = ["bad/owner"]', "not a valid"),
         ('repos = ["a/b"]\nrepo = []', "unknown keys: repo"),
+        ('repos = ["a/b"]\ntheme = 1', "'theme' must be a string"),
         ("", "no 'repos' or 'owners'"),
         ("repos = [", "invalid TOML"),
     ],
@@ -49,3 +50,8 @@ def test_default_path_honours_environment(monkeypatch, tmp_path):
     assert config.default_path() == tmp_path / "ramon" / "config.toml"
     monkeypatch.setenv("RAMON_CONFIG", "/x.toml")
     assert str(config.default_path()) == "/x.toml"
+
+
+def test_parse_theme():
+    assert config.parse('repos = ["a/b"]\ntheme = "nord"').theme == "nord"
+    assert config.parse('repos = ["a/b"]').theme is None

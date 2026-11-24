@@ -7,6 +7,7 @@ before they reach the application. No binding may use one of them."""
 from datetime import UTC, datetime
 
 import pytest
+from textual.command import CommandPalette
 
 from ramon import github
 from ramon.app import RamonApp
@@ -57,7 +58,7 @@ async def test_no_binding_is_reserved():
     async with app.run_test() as pilot:
         await pilot.pause()
         keys = active_keys(app)
-    assert {"r", "o", "a", "p", "i", "q", "ctrl+c"} <= keys
+    assert {"r", "o", "a", "p", "i", "q", "ctrl+c", "colon"} <= keys
     assert sorted(k for k in keys if reserved(k)) == []
 
 
@@ -69,3 +70,12 @@ async def test_quit_keys(key):
         await pilot.press(key)
         await pilot.pause()
         assert not app.is_running
+
+
+async def test_colon_opens_command_palette():
+    app = RamonApp(fetch, interval=3600)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        await pilot.press("colon")
+        await pilot.pause()
+        assert isinstance(app.screen, CommandPalette)

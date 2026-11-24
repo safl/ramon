@@ -50,6 +50,9 @@ repos = [
 
 # Every non-archived repository of these users or organisations.
 owners = []
+
+# A Textual theme, such as "nord" or "gruvbox"; ':' in ramon lists them.
+theme = "nord"
 ```
 
 ## Keys
@@ -61,12 +64,15 @@ owners = []
 | `a`       | Show only the repositories marked `!` |
 | `p`, `i`  | Show the pull requests or the issues |
 | `tab`     | Move focus between the tables |
+| `:`       | Command palette: change the theme for this session, show the keys |
 | `q`, `ctrl+c` | Quit |
 
 The keys are plain letters, `tab`, the arrows and the page keys, which zellij's
 normal mode and Windows Terminal pass through. ramon binds no Alt key, no
-Ctrl+Shift key and none of zellij's mode keys; Textual's `ctrl+p` command
-palette and `ctrl+q` quit are disabled for that reason.
+Ctrl+Shift key and none of zellij's mode keys. For that reason Textual's
+command palette is on `:` rather than `ctrl+p`, and Textual's `ctrl+q` quit is
+disabled. A theme chosen in the palette lasts until ramon exits; set `theme`
+in the configuration to keep it.
 
 `ramon --plain` prints the repository table once and exits. It exits with 1
 when a repository could not be fetched.
