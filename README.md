@@ -64,7 +64,7 @@ repos = [
 # Every non-archived repository of these users or organisations.
 owners = []
 
-# A Textual theme, such as "nord" or "gruvbox"; 't' in ramon steps through them.
+# A Textual theme; 't' in ramon steps through them. The default is "gruvbox".
 theme = "nord"
 
 # "nerd" shows states as Nerd Font glyphs; the terminal needs a Nerd Font.
