@@ -30,6 +30,7 @@ def test_example_parses():
         ('owners = ["bad/owner"]', "not a valid"),
         ('repos = ["a/b"]\nrepo = []', "unknown keys: repo"),
         ('repos = ["a/b"]\ntheme = 1', "'theme' must be a string"),
+        ('repos = ["a/b"]\nglyphs = "emoji"', "'glyphs' must be"),
         ("", "no 'repos' or 'owners'"),
         ("repos = [", "invalid TOML"),
     ],
@@ -55,3 +56,8 @@ def test_default_path_honours_environment(monkeypatch, tmp_path):
 def test_parse_theme():
     assert config.parse('repos = ["a/b"]\ntheme = "nord"').theme == "nord"
     assert config.parse('repos = ["a/b"]').theme is None
+
+
+def test_parse_glyphs():
+    assert config.parse('repos = ["a/b"]').glyphs == "text"
+    assert config.parse('repos = ["a/b"]\nglyphs = "nerd"').glyphs == "nerd"

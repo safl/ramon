@@ -17,7 +17,7 @@ from rich.table import Table
 from ramon import config, github, render
 
 
-def print_plain(snapshot: github.Snapshot) -> None:
+def print_plain(snapshot: github.Snapshot, nerd: bool = False) -> None:
     now = datetime.now(UTC)
     table = Table(box=None, pad_edge=False)
     for col in (
@@ -32,19 +32,19 @@ def print_plain(snapshot: github.Snapshot) -> None:
     ):
         table.add_column(col, no_wrap=True)
     for repo in snapshot.repos:
-        mark = "!" if repo.needs_attention(snapshot.viewer) else ""
+        mark = render.attention(nerd) if repo.needs_attention(snapshot.viewer) else ""
         if repo.error:
-            table.add_row(mark, repo.name, "[bold red]error[/]")
+            table.add_row(mark, repo.name, render.fetch_error(nerd))
             continue
         awaiting = sum(1 for pr in repo.prs if snapshot.viewer in pr.reviewers)
         table.add_row(
             mark,
             repo.name,
-            render.checks(repo.checks),
+            render.checks(repo.checks, nerd),
             str(repo.pr_count),
             str(awaiting),
             str(repo.issue_count),
-            repo.release or "-",
+            render.release(repo.release, nerd),
             render.age(repo.pushed_at, now),
         )
     console = Console()
@@ -88,12 +88,12 @@ def main(argv: list[str] | None = None) -> int:
         except github.GhError as exc:
             print(f"ramon: {exc}", file=sys.stderr)
             return 1
-        print_plain(snapshot)
+        print_plain(snapshot, cfg.glyphs == "nerd")
         return 1 if any(r.error for r in snapshot.repos) else 0
 
     from ramon.app import RamonApp
 
-    app = RamonApp(fetcher, cfg.interval)
+    app = RamonApp(fetcher, cfg.interval, nerd=cfg.glyphs == "nerd")
     if cfg.theme and cfg.theme not in app.available_themes:
         names = ", ".join(sorted(app.available_themes))
         print(f"ramon: unknown theme {cfg.theme!r}; one of: {names}", file=sys.stderr)

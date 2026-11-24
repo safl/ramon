@@ -26,6 +26,9 @@ owners = []
 
 # A Textual theme, such as "nord" or "gruvbox"; 't' in ramon steps through them.
 # theme = "nord"
+
+# "nerd" shows states as Nerd Font glyphs; the terminal needs a Nerd Font.
+# glyphs = "text"
 """
 
 
@@ -39,6 +42,7 @@ class Config:
     owners: list[str] = field(default_factory=list)
     interval: int = 300
     theme: str | None = None
+    glyphs: str = "text"
 
 
 def default_path() -> Path:
@@ -56,7 +60,7 @@ def parse(text: str) -> Config:
     except tomllib.TOMLDecodeError as exc:
         raise ConfigError(f"invalid TOML: {exc}") from exc
 
-    unknown = set(data) - {"repos", "owners", "interval", "theme"}
+    unknown = set(data) - {"repos", "owners", "interval", "theme", "glyphs"}
     if unknown:
         raise ConfigError(f"unknown keys: {', '.join(sorted(unknown))}")
 
@@ -64,6 +68,7 @@ def parse(text: str) -> Config:
     owners = data.get("owners", [])
     interval = data.get("interval", 300)
     theme = data.get("theme")
+    glyphs = data.get("glyphs", "text")
 
     if not isinstance(repos, list) or not all(isinstance(r, str) for r in repos):
         raise ConfigError("'repos' must be a list of strings")
@@ -73,6 +78,8 @@ def parse(text: str) -> Config:
         raise ConfigError("'interval' must be an integer of at least 30 seconds")
     if theme is not None and not isinstance(theme, str):
         raise ConfigError("'theme' must be a string")
+    if glyphs not in ("text", "nerd"):
+        raise ConfigError('\'glyphs\' must be "text" or "nerd"')
 
     for repo in repos:
         if not REPO_PATTERN.match(repo):
@@ -88,6 +95,7 @@ def parse(text: str) -> Config:
         owners=owners,
         interval=interval,
         theme=theme,
+        glyphs=glyphs,
     )
 
 
