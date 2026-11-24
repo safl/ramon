@@ -25,6 +25,39 @@ from ramon.github import GhError, Repo, Snapshot
 
 Fetcher = Callable[[], Awaitable[Snapshot]]
 
+# Bindings shown on the right of the footer; the rest are shown on the left.
+RIGHT_ACTIONS = {"reload", "next_theme", "quit"}
+
+
+class NavTable(DataTable):
+    """A DataTable whose left, right and enter switch the detail tab and open
+    the highlighted row, in place of moving the cell cursor. Bound here rather
+    than on the app, so that they do not act while the command palette is open.
+    """
+
+    BINDINGS: ClassVar[list[BindingType]] = [
+        Binding("left", "app.show_tab('prs')", "PRs"),
+        Binding("right", "app.show_tab('issues')", "Issues"),
+        Binding("enter", "app.open", "Open"),
+    ]
+
+
+class SplitFooter(Footer):
+    """A Footer with the keys of RIGHT_ACTIONS pushed to its right end."""
+
+    DEFAULT_CSS = """
+    SplitFooter .spacer { width: 1fr; }
+    """
+
+    def compose(self) -> ComposeResult:
+        spaced = False
+        for widget in super().compose():
+            right = getattr(widget, "action", None) in RIGHT_ACTIONS
+            if right and not spaced:
+                yield Static(classes="spacer")
+                spaced = True
+            yield widget
+
 
 # Textual's own app keys are not inherited, and the command palette moves
 # from ctrl+p to ':': zellij takes ctrl+p (pane mode) and ctrl+q (quits the
@@ -39,11 +72,9 @@ class RamonApp(App, inherit_bindings=False):
     #detail { height: 1; padding: 0 1; }
     """
     BINDINGS: ClassVar[list[BindingType]] = [
-        Binding("r", "reload", "Refresh"),
-        Binding("o", "open", "Open in browser"),
         Binding("a", "toggle_attention", "Attention only"),
-        Binding("p", "show_tab('prs')", "PRs"),
-        Binding("i", "show_tab('issues')", "Issues"),
+        Binding("r", "reload", "Refresh"),
+        Binding("t", "next_theme", "Theme"),
         Binding("q", "quit", "Quit"),
         Binding("ctrl+c", "quit", show=False, priority=True),
     ]
@@ -55,17 +86,18 @@ class RamonApp(App, inherit_bindings=False):
         self.snapshot: Snapshot | None = None
         self.attention_only = False
         self.loading_snapshot = False
+        self.status = "loading..."
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield DataTable(id="repos", cursor_type="row", zebra_stripes=True)
+        yield NavTable(id="repos", cursor_type="row", zebra_stripes=True)
         yield Static(id="detail")
         with TabbedContent(id="tabs"):
             with TabPane("Pull requests", id="prs"):
-                yield DataTable(id="pr-table", cursor_type="row")
+                yield NavTable(id="pr-table", cursor_type="row")
             with TabPane("Issues", id="issues"):
-                yield DataTable(id="issue-table", cursor_type="row")
-        yield Footer()
+                yield NavTable(id="issue-table", cursor_type="row")
+        yield SplitFooter()
 
     def on_mount(self) -> None:
         self.query_one("#repos", DataTable).add_columns(
@@ -94,7 +126,9 @@ class RamonApp(App, inherit_bindings=False):
             "Labels",
             "Title",
         )
-        self.sub_title = "loading..."
+        # left and right switch the tabs, so tab moves between the tables only
+        self.query_one("#tabs Tabs").can_focus = False
+        self.show_status()
         self.set_interval(self.interval, self.action_reload)
         self.action_reload()
 
@@ -107,7 +141,8 @@ class RamonApp(App, inherit_bindings=False):
         try:
             self.snapshot = await self.fetcher()
         except GhError as exc:
-            self.sub_title = f"error: {exc}"
+            self.status = f"error: {exc}"
+            self.show_status()
             self.notify(str(exc), severity="error", timeout=10)
             return
         finally:
@@ -171,10 +206,14 @@ class RamonApp(App, inherit_bindings=False):
         flagged = sum(1 for r in snap.repos if r.needs_attention(snap.viewer))
         local = snap.fetched_at.astimezone().strftime("%H:%M:%S")
         shown = "attention only, " if self.attention_only else ""
-        self.sub_title = (
+        self.status = (
             f"{snap.viewer} | {len(snap.repos)} repos, {flagged} need attention"
             f" | {shown}updated {local}"
         )
+        self.show_status()
+
+    def show_status(self) -> None:
+        self.sub_title = f"{self.status} | {self.theme}"
 
     def selected_repo(self) -> Repo | None:
         table = self.query_one("#repos", DataTable)
@@ -236,8 +275,18 @@ class RamonApp(App, inherit_bindings=False):
         if self.snapshot is not None:
             self.populate_repos()
 
+    def action_next_theme(self) -> None:
+        names = sorted(self.available_themes)
+        current = names.index(self.theme) if self.theme in names else -1
+        self.theme = names[(current + 1) % len(names)]
+        self.show_status()
+
     def action_show_tab(self, tab: str) -> None:
         self.query_one("#tabs", TabbedContent).active = tab
+        focused = self.focused
+        if isinstance(focused, DataTable) and focused.id != "repos":
+            table = "#pr-table" if tab == "prs" else "#issue-table"
+            self.query_one(table, DataTable).focus()
 
     def url_under_cursor(self) -> str | None:
         """Return the URL of the PR or issue when a detail table has focus,

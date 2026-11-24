@@ -4,7 +4,7 @@
 
 from datetime import UTC, datetime
 
-from textual.widgets import DataTable, Static
+from textual.widgets import DataTable, Static, TabbedContent
 
 from ramon import github
 from ramon.app import RamonApp
@@ -68,9 +68,9 @@ async def test_open_repo_and_pr(payload):
     app, _ = make_app(payload, opened)
     async with app.run_test() as pilot:
         await pilot.pause()
-        await pilot.press("o")
-        app.query_one("#pr-table", DataTable).focus()
-        await pilot.press("down", "o")
+        await pilot.press("enter")
+        await pilot.press("tab")
+        await pilot.press("down", "enter")
     assert opened == ["https://github.com/o/ok", "https://github.com/o/r/pull/2"]
 
 
@@ -81,7 +81,7 @@ async def test_fetch_error_is_shown():
     app = RamonApp(fetcher, interval=3600)
     async with app.run_test() as pilot:
         await pilot.pause()
-        assert app.sub_title == "error: gh auth login"
+        assert app.sub_title.startswith("error: gh auth login | ")
         assert app.query_one("#repos", DataTable).row_count == 0
 
 
@@ -93,3 +93,27 @@ async def test_detail_line_shows_head_commit_or_error(payload):
         assert str(detail.render()) == "main: docs: a change"
         await pilot.press("down")
         assert str(detail.render()).startswith("Could not resolve")
+
+
+async def test_left_right_switch_tabs_and_keep_focus_in_details(payload):
+    app, _ = make_app(payload)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        tabs = app.query_one("#tabs", TabbedContent)
+        repos = app.query_one("#repos", DataTable)
+        await pilot.press("right")
+        assert tabs.active == "issues"
+        assert app.focused is repos
+        await pilot.press("left")
+        assert tabs.active == "prs"
+
+        await pilot.press("tab")
+        assert app.focused.id == "pr-table"
+        await pilot.press("right")
+        assert tabs.active == "issues"
+        assert app.focused.id == "issue-table"
+
+        # up and down move within the focused table, the repositories first
+        await pilot.press("shift+tab")
+        await pilot.press("down")
+        assert app.selected_repo().name == "o/missing"

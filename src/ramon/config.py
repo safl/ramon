@@ -24,7 +24,7 @@ repos = [
 # Every non-archived repository of these users or organisations.
 owners = []
 
-# A Textual theme, such as "nord" or "gruvbox"; ':' in ramon lists them.
+# A Textual theme, such as "nord" or "gruvbox"; 't' in ramon steps through them.
 # theme = "nord"
 """
 
