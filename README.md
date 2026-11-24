@@ -53,6 +53,9 @@ owners = []
 
 # A Textual theme, such as "nord" or "gruvbox"; 't' in ramon steps through them.
 theme = "nord"
+
+# "nerd" shows states as Nerd Font glyphs; the terminal needs a Nerd Font.
+glyphs = "text"
 ```
 
 ## Keys

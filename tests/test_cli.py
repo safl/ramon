@@ -5,7 +5,7 @@
 from datetime import UTC, datetime
 
 import ramon
-from ramon import github
+from ramon import github, render
 
 NAMES = ["o/ok", "o/missing", "o/red"]
 
@@ -47,3 +47,16 @@ def test_unknown_theme_exits_2(tmp_path, capsys):
     cfg.write_text('repos = ["a/b"]\ntheme = "no-such-theme"')
     assert ramon.main(["--config", str(cfg)]) == 2
     assert "unknown theme 'no-such-theme'; one of:" in capsys.readouterr().err
+
+
+def test_plain_with_nerd_glyphs(payload, tmp_path, monkeypatch, capsys):
+    async def fetch(repos, owners):
+        viewer, parsed = github.parse_response(NAMES, payload)
+        return github.Snapshot(viewer, parsed, datetime.now(UTC))
+
+    monkeypatch.setattr(github, "fetch", fetch)
+    cfg = tmp_path / "config.toml"
+    cfg.write_text('repos = ["o/ok", "o/missing", "o/red"]\nglyphs = "nerd"')
+    ramon.main(["--config", str(cfg), "--plain"])
+    out = capsys.readouterr().out
+    assert render.NERD["check"] in out and render.NERD["x"] in out

@@ -79,10 +79,11 @@ class RamonApp(App, inherit_bindings=False):
         Binding("ctrl+c", "quit", show=False, priority=True),
     ]
 
-    def __init__(self, fetcher: Fetcher, interval: int) -> None:
+    def __init__(self, fetcher: Fetcher, interval: int, nerd: bool = False) -> None:
         super().__init__()
         self.fetcher = fetcher
         self.interval = interval
+        self.nerd = nerd
         self.snapshot: Snapshot | None = None
         self.attention_only = False
         self.loading_snapshot = False
@@ -168,14 +169,14 @@ class RamonApp(App, inherit_bindings=False):
         table.clear()
         for repo in self.visible_repos():
             mark = (
-                Text("!", style="bold red") if repo.needs_attention(snap.viewer) else ""
+                render.attention(self.nerd) if repo.needs_attention(snap.viewer) else ""
             )
             if repo.error:
                 table.add_row(
                     mark,
                     repo.name,
                     "",
-                    Text("error", style="bold red"),
+                    render.fetch_error(self.nerd),
                     "",
                     "",
                     "",
@@ -190,11 +191,11 @@ class RamonApp(App, inherit_bindings=False):
                 mark,
                 name,
                 repo.branch or "-",
-                render.checks(repo.checks),
+                render.checks(repo.checks, self.nerd),
                 render.count(repo.pr_count),
                 render.count(awaiting, "bold yellow"),
                 render.count(repo.issue_count),
-                repo.release or "-",
+                render.release(repo.release, self.nerd),
                 render.age(repo.pushed_at, now),
                 key=repo.name,
             )
@@ -246,8 +247,8 @@ class RamonApp(App, inherit_bindings=False):
             prs.add_row(
                 str(pr.number),
                 render.age(pr.updated_at, now),
-                render.checks(pr.checks),
-                render.review(pr.review_decision, pr.is_draft),
+                render.checks(pr.checks, self.nerd),
+                render.review(pr.review_decision, pr.is_draft, self.nerd),
                 pr.author,
                 title,
                 key=pr.url,
@@ -263,8 +264,10 @@ class RamonApp(App, inherit_bindings=False):
             )
 
         tabs = self.query_one("#tabs", TabbedContent)
-        tabs.get_tab("prs").label = f"Pull requests ({repo.pr_count})"
-        tabs.get_tab("issues").label = f"Issues ({repo.issue_count})"
+        tabs.get_tab("prs").label = render.tab_label("prs", repo.pr_count, self.nerd)
+        tabs.get_tab("issues").label = render.tab_label(
+            "issues", repo.issue_count, self.nerd
+        )
 
     def on_data_table_row_highlighted(self, event: DataTable.RowHighlighted) -> None:
         if event.data_table.id == "repos":

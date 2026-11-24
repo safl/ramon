@@ -6,13 +6,13 @@ from datetime import UTC, datetime
 
 from textual.widgets import DataTable, Static, TabbedContent
 
-from ramon import github
+from ramon import github, render
 from ramon.app import RamonApp
 
 NAMES = ["o/ok", "o/missing", "o/red"]
 
 
-def make_app(payload, opened=None):
+def make_app(payload, opened=None, nerd=False):
     calls = []
 
     async def fetcher():
@@ -20,7 +20,7 @@ def make_app(payload, opened=None):
         viewer, repos = github.parse_response(NAMES, payload)
         return github.Snapshot(viewer, repos, datetime.now(UTC))
 
-    app = RamonApp(fetcher, interval=3600)
+    app = RamonApp(fetcher, interval=3600, nerd=nerd)
     if opened is not None:
         app.open_url = lambda url, **kw: opened.append(url)
     return app, calls
@@ -117,3 +117,22 @@ async def test_left_right_switch_tabs_and_keep_focus_in_details(payload):
         await pilot.press("shift+tab")
         await pilot.press("down")
         assert app.selected_repo().name == "o/missing"
+
+
+async def test_nerd_glyphs_in_the_tables(payload):
+    app, _ = make_app(payload, nerd=True)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        repos = app.query_one("#repos", DataTable)
+        row = repos.get_row("o/ok")
+        assert str(row[0]) == render.NERD["alert"]
+        assert str(row[3]) == render.NERD["check"]
+        assert str(row[7]) == f"{render.NERD['tag']} v0.8.0"
+        assert str(repos.get_row("o/missing")[3]) == f"{render.NERD['x']} error"
+        prs = app.query_one("#pr-table", DataTable)
+        assert [str(c) for c in prs.get_row_at(0)[2:4]] == [
+            render.NERD["check"],
+            render.NERD["eye"],
+        ]
+        label = app.query_one("#tabs", TabbedContent).get_tab("prs").label
+        assert str(label).startswith(render.NERD["pull_request"])
