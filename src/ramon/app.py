@@ -25,6 +25,8 @@ from ramon.github import GhError, Repo, Snapshot
 
 Fetcher = Callable[[], Awaitable[Snapshot]]
 
+DEFAULT_THEME = "gruvbox"
+
 # Bindings shown on the right of the footer; the rest are shown on the left.
 RIGHT_ACTIONS = {"reload", "next_theme", "quit"}
 
@@ -84,6 +86,7 @@ class RamonApp(App, inherit_bindings=False):
         self.fetcher = fetcher
         self.interval = interval
         self.nerd = nerd
+        self.theme = DEFAULT_THEME
         self.snapshot: Snapshot | None = None
         self.attention_only = False
         self.loading_snapshot = False

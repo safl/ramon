@@ -136,3 +136,11 @@ async def test_nerd_glyphs_in_the_tables(payload):
         ]
         label = app.query_one("#tabs", TabbedContent).get_tab("prs").label
         assert str(label).startswith(render.NERD["pull_request"])
+
+
+async def test_default_theme_is_gruvbox(payload):
+    app, _ = make_app(payload)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        assert app.theme == "gruvbox"
+        assert app.sub_title.endswith("| gruvbox")
