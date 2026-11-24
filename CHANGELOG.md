@@ -16,6 +16,11 @@ the `## X.Y.Z` section to this file. When it lands on `main`,
 the pull request, then tags the commit and creates the GitHub release. Release
 tags are not pushed by hand.
 
+## 0.2.1
+
+ramon starts with the gruvbox theme when the configuration sets no `theme`,
+in place of Textual's textual-dark.
+
 ## 0.2.0
 
 ramon now works inside zellij and Windows Terminal: it binds no key that
