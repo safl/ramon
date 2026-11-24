@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: Simon A. F. Lund <os@safl.dk>
+#
+# SPDX-License-Identifier: GPL-2.0-only
+
+[project]
+name = "ramon"
+version = "0.0.0"
+description = "Monitor the GitHub state of a list of repositories in a terminal UI"
+readme = "README.md"
+license = "GPL-2.0-only"
+license-files = ["LICENSES/*.txt"]
+authors = [
+    { name = "Simon A. F. Lund", email = "os@safl.dk" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "textual>=8.2.8",
+]
+
+[project.urls]
+Repository = "https://github.com/safl/ramon"
+
+[project.scripts]
+ramon = "ramon:main"
+
+[build-system]
+requires = ["uv_build>=0.11.17,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+
+[tool.ruff.lint]
+extend-select = ["I", "B", "UP"]
+
+[tool.mypy]
+files = ["src"]
+python_version = "3.12"

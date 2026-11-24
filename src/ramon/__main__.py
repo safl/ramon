@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Simon A. F. Lund <os@safl.dk>
+#
+# SPDX-License-Identifier: GPL-2.0-only
+import sys
+
+from ramon import main
+
+sys.exit(main())

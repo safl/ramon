@@ -1,0 +1,11 @@
+version = 1
+SPDX-PackageName = "ramon"
+SPDX-PackageSupplier = "Simon A. F. Lund <os@safl.dk>"
+SPDX-PackageDownloadLocation = "https://github.com/safl/ramon"
+
+# Read by uv, which accepts no comment to carry a header
+[[annotations]]
+path = ["uv.lock", ".python-version"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Simon A. F. Lund <os@safl.dk>"
+SPDX-License-Identifier = "GPL-2.0-only"

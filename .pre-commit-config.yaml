@@ -1,0 +1,54 @@
+---
+# SPDX-FileCopyrightText: Simon A. F. Lund <os@safl.dk>
+#
+# SPDX-License-Identifier: GPL-2.0-only
+
+default_language_version:
+  python: python3
+
+repos:
+- repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+  rev: 0.2.3
+  hooks:
+  - id: yamlfmt
+    name: YAML-format
+    args:
+    - '--mapping=2'
+    - '--sequence=2'
+    - '--offset=0'
+    - '--width=120'
+    - '--preserve-quotes'
+    types: [file]
+    files: \.(yaml|yml)$
+
+- repo: https://github.com/rhysd/actionlint
+  rev: v1.7.12
+  hooks:
+  - id: actionlint
+    name: GitHub-workflows-lint-actionlint
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.17.6
+  hooks:
+  - id: ruff-format
+    name: Python-format-ruff
+  - id: ruff-check
+    name: Python-lint-ruff
+    args: [--fix]
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v2.4.1
+  hooks:
+  - id: mypy
+    name: Python-typecheck-mypy
+    # Check src as a whole, by the [tool.mypy] in pyproject.toml
+    pass_filenames: false
+    additional_dependencies:
+    - textual==8.2.8
+
+# Every file says its copyright and license, see REUSE.toml
+- repo: https://github.com/fsfe/reuse-tool
+  rev: v6.2.0
+  hooks:
+  - id: reuse
+    name: REUSE-compliance

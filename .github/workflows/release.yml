@@ -1,0 +1,48 @@
+---
+# SPDX-FileCopyrightText: Simon A. F. Lund <os@safl.dk>
+#
+# SPDX-License-Identifier: GPL-2.0-only
+
+name: release
+
+# A merged 'ver: bump to vX.Y.Z' commit on main is tagged and released. Nothing
+# is published to PyPI; ramon is run with uvx from the tag.
+on:
+  push:
+    branches:
+    - "main"
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: >-
+      startsWith(github.event.head_commit.message, 'ver: bump to v')
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: read
+    steps:
+    - name: Grab source
+      uses: actions/checkout@v5.0.1
+
+    - name: Check the version bump, and that its pull request was tested
+      id: check
+      uses: refenv/gha-project-auto-release/check@v1
+      with:
+        version-file: pyproject.toml
+        version-pattern: '^version = "([^"]+)"$'
+        workflows: verify.yml
+        jobs: |
+          verify.yml: format
+          verify.yml: test
+          verify.yml: release-ready
+
+    - name: Tag and create the release
+      uses: refenv/gha-project-auto-release/release@v1
+      with:
+        version: ${{ steps.check.outputs.version }}
+        notes-file: ${{ steps.check.outputs.notes-file }}
