@@ -51,28 +51,30 @@ repos = [
 # Every non-archived repository of these users or organisations.
 owners = []
 
-# A Textual theme, such as "nord" or "gruvbox"; ':' in ramon lists them.
+# A Textual theme, such as "nord" or "gruvbox"; 't' in ramon steps through them.
 theme = "nord"
 ```
 
 ## Keys
 
-| Key       | Action |
-|-----------|--------|
-| `r`       | Refresh now |
-| `o`       | Open the highlighted repository, or pull request or issue when its table has focus, in the browser |
-| `a`       | Show only the repositories marked `!` |
-| `p`, `i`  | Show the pull requests or the issues |
-| `tab`     | Move focus between the tables |
-| `:`       | Command palette: change the theme for this session, show the keys |
+| Key           | Action |
+|---------------|--------|
+| `up`, `down`  | Move through the repositories, or through the pull requests or issues when their table has focus |
+| `left`, `right` | Show the pull requests or the issues |
+| `enter`       | Open the highlighted repository, pull request or issue in the browser |
+| `tab`         | Move focus between the repositories and the pull requests or issues |
+| `a`           | Show only the repositories marked `!` |
+| `r`           | Refresh now |
+| `t`           | Switch to the next theme; its name is shown in the title bar |
+| `:`           | Command palette |
 | `q`, `ctrl+c` | Quit |
 
-The keys are plain letters, `tab`, the arrows and the page keys, which zellij's
+The keys are plain letters, `tab`, `enter` and the arrows, which zellij's
 normal mode and Windows Terminal pass through. ramon binds no Alt key, no
 Ctrl+Shift key and none of zellij's mode keys. For that reason Textual's
 command palette is on `:` rather than `ctrl+p`, and Textual's `ctrl+q` quit is
-disabled. A theme chosen in the palette lasts until ramon exits; set `theme`
-in the configuration to keep it.
+disabled. A theme chosen with `t` lasts until ramon exits; set `theme` in the
+configuration to keep it.
 
 `ramon --plain` prints the repository table once and exits. It exits with 1
 when a repository could not be fetched.
