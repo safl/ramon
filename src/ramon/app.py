@@ -26,13 +26,13 @@ from ramon.github import GhError, Repo, Snapshot
 Fetcher = Callable[[], Awaitable[Snapshot]]
 
 
-# Textual's own app keys are not inherited: zellij takes ctrl+p (pane mode)
-# and ctrl+q (quits the session) before they reach the app. Every key here
-# must pass through zellij's normal mode and Windows Terminal; see
-# tests/test_keys.py.
+# Textual's own app keys are not inherited, and the command palette moves
+# from ctrl+p to ':': zellij takes ctrl+p (pane mode) and ctrl+q (quits the
+# session) before they reach the app. Every key here must pass through
+# zellij's normal mode and Windows Terminal; see tests/test_keys.py.
 class RamonApp(App, inherit_bindings=False):
     TITLE = "ramon"
-    ENABLE_COMMAND_PALETTE = False
+    COMMAND_PALETTE_BINDING = "colon"
     CSS = """
     #repos { height: 1fr; }
     TabbedContent { height: 1fr; }

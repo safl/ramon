@@ -93,5 +93,12 @@ def main(argv: list[str] | None = None) -> int:
 
     from ramon.app import RamonApp
 
-    RamonApp(fetcher, cfg.interval).run()
+    app = RamonApp(fetcher, cfg.interval)
+    if cfg.theme and cfg.theme not in app.available_themes:
+        names = ", ".join(sorted(app.available_themes))
+        print(f"ramon: unknown theme {cfg.theme!r}; one of: {names}", file=sys.stderr)
+        return 2
+    if cfg.theme:
+        app.theme = cfg.theme
+    app.run()
     return 0

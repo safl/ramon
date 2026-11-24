@@ -29,3 +29,21 @@ def test_plain_prints_table_and_errors(payload, tmp_path, monkeypatch, capsys):
 def test_missing_config_exits_2(tmp_path, capsys):
     assert ramon.main(["--config", str(tmp_path / "none.toml")]) == 2
     assert "does not exist" in capsys.readouterr().err
+
+
+def test_theme_from_config(tmp_path, monkeypatch):
+    from ramon.app import RamonApp
+
+    themes = []
+    monkeypatch.setattr(RamonApp, "run", lambda app: themes.append(app.theme))
+    cfg = tmp_path / "config.toml"
+    cfg.write_text('repos = ["a/b"]\ntheme = "nord"')
+    assert ramon.main(["--config", str(cfg)]) == 0
+    assert themes == ["nord"]
+
+
+def test_unknown_theme_exits_2(tmp_path, capsys):
+    cfg = tmp_path / "config.toml"
+    cfg.write_text('repos = ["a/b"]\ntheme = "no-such-theme"')
+    assert ramon.main(["--config", str(cfg)]) == 2
+    assert "unknown theme 'no-such-theme'; one of:" in capsys.readouterr().err
